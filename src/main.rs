@@ -1,5 +1,9 @@
 use std::io::{stderr, stdout, Write};
 
+use colour::Colour;
+mod colour;
+mod vec3;
+
 fn main() {
     // Image
     let image_width = 256;
@@ -9,26 +13,21 @@ fn main() {
     let mut stdout = stdout();
     let mut stderr = stderr();
     stdout
-        .write_all(format!("P3\n{} {}\n255\n", image_width, image_height).as_bytes())
+        .write_all(format!("P3\n{image_width} {image_height}\n255\n").as_bytes())
         .unwrap();
 
     for row in (0..image_height).rev() {
         stderr
-            .write_all(format!("\rScanlines remaining: {} ", row).as_bytes())
+            .write_all(format!("\rScanlines remaining: {row} ").as_bytes())
             .unwrap();
 
         for col in 0..image_width {
-            let r = col as f32 / (image_width - 1) as f32;
-            let g = row as f32 / (image_height - 1) as f32;
-            let b = 0.25;
-
-            let ir = (255.999 * r) as i32;
-            let ig = (255.999 * g) as i32;
-            let ib = (255.999 * b) as i32;
-
-            stdout
-                .write_all(format!("{} {} {}\n", ir, ig, ib).as_bytes())
-                .unwrap();
+            let pixel_colour = Colour::new(
+                col as f64 / (image_width - 1) as f64,
+                row as f64 / (image_height - 1) as f64,
+                0.25,
+            );
+            pixel_colour.write_to(&mut stdout);
         }
     }
 
