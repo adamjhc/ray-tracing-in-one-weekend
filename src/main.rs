@@ -1,9 +1,18 @@
+use hittable_list::HittableList;
 use ray::Ray;
-use std::io::{stderr, stdout, Write};
+use sphere::Sphere;
+use std::{
+    io::{stderr, stdout, Write},
+    rc::Rc,
+};
 use vec3::{Point3, Vec3};
 
 mod colour;
+mod hittable;
+mod hittable_list;
 mod ray;
+mod sphere;
+mod utils;
 mod vec3;
 
 fn main() {
@@ -11,6 +20,11 @@ fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
+
+    // World
+    let mut world = HittableList::new();
+    world.add(Rc::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+    world.add(Rc::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
     // Camera
     let viewport_height = 2.0;
@@ -42,8 +56,10 @@ fn main() {
                 origin,
                 lower_left_corner + u * horizontal + v * vertical - origin,
             );
-            let pixel_colour = ray.ray_colour();
-            pixel_colour.write_to(&mut stdout);
+            let pixel_colour = ray.ray_colour(&world);
+            stdout
+                .write_all(format!("{pixel_colour}\n").as_bytes())
+                .unwrap()
         }
     }
 

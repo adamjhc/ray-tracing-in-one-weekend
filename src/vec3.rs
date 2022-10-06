@@ -3,6 +3,8 @@ use std::{
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub},
 };
 
+use crate::colour::Colour;
+
 pub type Point3 = Vec3;
 
 #[derive(Clone, Copy)]
@@ -63,6 +65,14 @@ impl Add for Vec3 {
             y: self.y + rhs.y,
             z: self.z + rhs.z,
         }
+    }
+}
+
+impl Add<Colour> for Vec3 {
+    type Output = Colour;
+
+    fn add(self, rhs: Colour) -> Self::Output {
+        Colour::new(self.x + rhs.r, self.y + rhs.g, self.z + rhs.b)
     }
 }
 
@@ -143,5 +153,15 @@ impl DivAssign<f64> for Vec3 {
 impl Display for Vec3 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} {} {}", self.x, self.y, self.z)
+    }
+}
+
+impl Default for Vec3 {
+    fn default() -> Self {
+        Self {
+            x: Default::default(),
+            y: Default::default(),
+            z: Default::default(),
+        }
     }
 }
