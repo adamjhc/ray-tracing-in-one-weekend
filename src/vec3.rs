@@ -7,7 +7,7 @@ use crate::colour::Colour;
 
 pub type Point3 = Vec3;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
@@ -153,15 +153,5 @@ impl DivAssign<f64> for Vec3 {
 impl Display for Vec3 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} {} {}", self.x, self.y, self.z)
-    }
-}
-
-impl Default for Vec3 {
-    fn default() -> Self {
-        Self {
-            x: Default::default(),
-            y: Default::default(),
-            z: Default::default(),
-        }
     }
 }

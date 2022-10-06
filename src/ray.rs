@@ -1,8 +1,8 @@
-use std::{f64::INFINITY, rc::Rc};
+use std::f64::INFINITY;
 
 use crate::{
     colour::Colour,
-    hittable::{HitRecord, Hittable},
+    hittable::HitRecord,
     hittable_list::HittableList,
     vec3::{Point3, Vec3},
 };

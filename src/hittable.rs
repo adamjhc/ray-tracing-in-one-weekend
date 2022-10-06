@@ -7,7 +7,7 @@ pub trait Hittable {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hit_record: &mut HitRecord) -> bool;
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct HitRecord {
     pub p: Point3,
     pub normal: Vec3,
@@ -23,16 +23,5 @@ impl HitRecord {
         } else {
             -outward_normal
         };
-    }
-}
-
-impl Default for HitRecord {
-    fn default() -> Self {
-        Self {
-            p: Default::default(),
-            normal: Default::default(),
-            t: Default::default(),
-            front_face: Default::default(),
-        }
     }
 }
