@@ -24,6 +24,7 @@ fn main() {
     let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
     let samples_per_pixel = 100;
+    let max_depth = 50;
 
     // World
     let mut world = HittableList::new();
@@ -51,7 +52,7 @@ fn main() {
                 let u = (col as f64 + random_double()) / (image_width - 1) as f64;
                 let v = (row as f64 + random_double()) / (image_height - 1) as f64;
                 let ray = camera.get_ray(u, v);
-                pixel_colour += ray.ray_colour(&world);
+                pixel_colour += ray.ray_colour(&world, max_depth);
             }
             stdout
                 .write_all(format!("{}\n", pixel_colour.write(samples_per_pixel)).as_bytes())

@@ -3,7 +3,10 @@ use std::{
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub},
 };
 
-use crate::colour::Colour;
+use crate::{
+    colour::Colour,
+    utils::{random_double, random_double_within_range},
+};
 
 pub type Point3 = Vec3;
 
@@ -17,6 +20,18 @@ pub struct Vec3 {
 impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
+    }
+
+    pub fn random() -> Self {
+        Self::new(random_double(), random_double(), random_double())
+    }
+
+    pub fn random_within_range(min: f64, max: f64) -> Self {
+        Self::new(
+            random_double_within_range(min, max),
+            random_double_within_range(min, max),
+            random_double_within_range(min, max),
+        )
     }
 
     pub fn length_squared(self) -> f64 {
@@ -41,6 +56,31 @@ impl Vec3 {
 
     pub fn unit_vector(self) -> Self {
         self / self.length()
+    }
+
+    pub fn random_in_unit_sphere() -> Self {
+        loop {
+            let p = Self::random_within_range(-1.0, 1.0);
+            if p.length_squared() >= 1.0 {
+                continue;
+            }
+
+            return p;
+        }
+    }
+
+    pub fn random_unit_vector() -> Self {
+        Self::random_in_unit_sphere().unit_vector()
+    }
+
+    pub fn random_in_hemisphere(&self) -> Vec3 {
+        let in_unit_sphere = Self::random_in_unit_sphere();
+        if in_unit_sphere.dot(self) > 0.0 {
+            // In the same hemisphere as the normal
+            in_unit_sphere
+        } else {
+            -in_unit_sphere
+        }
     }
 }
 

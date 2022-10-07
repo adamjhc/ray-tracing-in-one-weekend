@@ -1,5 +1,6 @@
 use std::ops::{Add, AddAssign, Mul};
 
+#[derive(Default)]
 pub struct Colour {
     pub r: f64,
     pub g: f64,
@@ -12,12 +13,14 @@ impl Colour {
     }
 
     pub fn write(&mut self, samples_per_pixel: i32) -> String {
+        // Divide the colour by the number of samples and gamma-correct for gamma=2.0
         let scale = 1.0 / samples_per_pixel as f64;
 
-        self.r *= scale;
-        self.g *= scale;
-        self.b *= scale;
+        self.r = (scale * self.r).sqrt();
+        self.g = (scale * self.g).sqrt();
+        self.b = (scale * self.b).sqrt();
 
+        // Write the translated [0, 255] value of each colour component
         format!(
             "{} {} {}",
             (256.0 * self.r.clamp(0.0, 0.999)) as i32,
