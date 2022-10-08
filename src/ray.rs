@@ -7,6 +7,7 @@ use crate::{
     vec3::{Point3, Vec3},
 };
 
+#[derive(Default)]
 pub struct Ray {
     pub origin: Point3,
     pub direction: Vec3,
@@ -29,11 +30,20 @@ impl Ray {
 
         let mut hit_record = HitRecord::default();
         if world.hit(self, 0.001, INFINITY, &mut hit_record) {
-            // let target = hit_record.p + hit_record.normal + Vec3::random_unit_vector();
-            let target = hit_record.p + hit_record.normal.random_in_hemisphere();
+            assert!(hit_record.material.is_some());
 
-            return 0.5
-                * Ray::new(hit_record.p, target - hit_record.p).ray_colour(world, depth - 1);
+            let mut scattered = Ray::default();
+            let mut attenuation = Colour::default();
+            return if hit_record.material.as_ref().unwrap().scatter(
+                self,
+                &hit_record,
+                &mut attenuation,
+                &mut scattered,
+            ) {
+                attenuation * scattered.ray_colour(world, depth - 1)
+            } else {
+                Colour::default()
+            };
         }
 
         let unit_direction = self.direction.unit_vector();

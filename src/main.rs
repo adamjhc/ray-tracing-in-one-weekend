@@ -1,6 +1,7 @@
 use camera::Camera;
 use colour::Colour;
 use hittable_list::HittableList;
+use material::{Lambertian, Metal};
 use sphere::Sphere;
 use std::{
     io::{stderr, stdout, Write},
@@ -13,6 +14,7 @@ mod camera;
 mod colour;
 mod hittable;
 mod hittable_list;
+mod material;
 mod ray;
 mod sphere;
 mod utils;
@@ -27,9 +29,32 @@ fn main() {
     let max_depth = 50;
 
     // World
+    let material_ground = Rc::new(Lambertian::new(Colour::new(0.8, 0.8, 0.0)));
+    let material_center = Rc::new(Lambertian::new(Colour::new(0.7, 0.3, 0.3)));
+    let material_left = Rc::new(Metal::new(Colour::new(0.8, 0.8, 0.8), 0.3));
+    let material_right = Rc::new(Metal::new(Colour::new(0.8, 0.6, 0.2), 1.0));
+
     let mut world = HittableList::new();
-    world.add(Rc::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
-    world.add(Rc::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
+    world.add(Rc::new(Sphere::new(
+        Point3::new(0.0, -100.5, -1.0),
+        100.0,
+        material_ground,
+    )));
+    world.add(Rc::new(Sphere::new(
+        Point3::new(0.0, 0.0, -1.0),
+        0.5,
+        material_center,
+    )));
+    world.add(Rc::new(Sphere::new(
+        Point3::new(-1.0, 0.0, -1.0),
+        0.5,
+        material_left,
+    )));
+    world.add(Rc::new(Sphere::new(
+        Point3::new(1.0, 0.0, -1.0),
+        0.5,
+        material_right,
+    )));
 
     // Camera
     let camera = Camera::new();
