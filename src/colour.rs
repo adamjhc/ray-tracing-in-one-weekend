@@ -1,5 +1,7 @@
 use std::ops::{Add, AddAssign, Mul};
 
+use crate::utils::{random_double, random_double_within_range};
+
 #[derive(Default, Clone, Copy)]
 pub struct Colour {
     pub r: f64,
@@ -26,6 +28,18 @@ impl Colour {
             (256.0 * self.r.clamp(0.0, 0.999)) as i32,
             (256.0 * self.g.clamp(0.0, 0.999)) as i32,
             (256.0 * self.b.clamp(0.0, 0.999)) as i32,
+        )
+    }
+
+    pub fn random() -> Self {
+        Self::new(random_double(), random_double(), random_double())
+    }
+
+    pub fn random_within_range(min: f64, max: f64) -> Self {
+        Self::new(
+            random_double_within_range(min, max),
+            random_double_within_range(min, max),
+            random_double_within_range(min, max),
         )
     }
 }
