@@ -1,7 +1,7 @@
 use camera::Camera;
 use colour::Colour;
 use hittable_list::HittableList;
-use material::{Lambertian, Metal};
+use material::{Dielectric, Lambertian, Metal};
 use sphere::Sphere;
 use std::{
     io::{stderr, stdout, Write},
@@ -30,9 +30,9 @@ fn main() {
 
     // World
     let material_ground = Rc::new(Lambertian::new(Colour::new(0.8, 0.8, 0.0)));
-    let material_center = Rc::new(Lambertian::new(Colour::new(0.7, 0.3, 0.3)));
-    let material_left = Rc::new(Metal::new(Colour::new(0.8, 0.8, 0.8), 0.3));
-    let material_right = Rc::new(Metal::new(Colour::new(0.8, 0.6, 0.2), 1.0));
+    let material_center = Rc::new(Lambertian::new(Colour::new(0.1, 0.2, 0.5)));
+    let material_left = Rc::new(Dielectric::new(1.5));
+    let material_right = Rc::new(Metal::new(Colour::new(0.8, 0.6, 0.2), 0.0));
 
     let mut world = HittableList::new();
     world.add(Rc::new(Sphere::new(
@@ -48,6 +48,11 @@ fn main() {
     world.add(Rc::new(Sphere::new(
         Point3::new(-1.0, 0.0, -1.0),
         0.5,
+        material_left.clone(),
+    )));
+    world.add(Rc::new(Sphere::new(
+        Point3::new(-1.0, 0.0, -1.0),
+        -0.4,
         material_left,
     )));
     world.add(Rc::new(Sphere::new(
