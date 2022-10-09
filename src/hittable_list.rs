@@ -20,10 +20,6 @@ impl HittableList {
         self.objects.push(object);
     }
 
-    pub fn clear(&mut self) {
-        self.objects.clear();
-    }
-
     pub fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hit_record: &mut HitRecord) -> bool {
         let mut temp_rec = HitRecord::default();
         let mut hit_anything = false;
