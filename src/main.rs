@@ -45,16 +45,12 @@ fn main() {
     );
 
     // Render
-    let mut stdout = stdout();
-    let mut stderr = stderr();
-    stdout
-        .write_all(format!("P3\n{image_width} {image_height}\n255\n").as_bytes())
-        .unwrap();
+    println!("P3");
+    println!("{image_width} {image_height}");
+    println!("255");
 
     for row in (0..image_height).rev() {
-        stderr
-            .write_all(format!("\rScanlines remaining: {row} ").as_bytes())
-            .unwrap();
+        eprint!("\rScanlines remaining: {row} ");
 
         for col in 0..image_width {
             let mut pixel_colour = Colour::new(0.0, 0.0, 0.0);
@@ -64,13 +60,12 @@ fn main() {
                 let ray = camera.get_ray(u, v);
                 pixel_colour += ray.ray_colour(&world, max_depth);
             }
-            stdout
-                .write_all(format!("{}\n", pixel_colour.write(samples_per_pixel)).as_bytes())
-                .unwrap()
+
+            println!("{}", pixel_colour.write(samples_per_pixel));
         }
     }
 
-    stderr.write_all("\r".as_bytes()).unwrap();
+    eprint!("\r");
 }
 
 fn random_scene() -> HittableList {
