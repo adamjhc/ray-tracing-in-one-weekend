@@ -46,11 +46,11 @@ impl Vec3 {
         self.x * v.x + self.y * v.y + self.z * v.z
     }
 
-    pub fn cross(u: &Self, v: &Self) -> Self {
+    pub fn cross(&self, v: &Self) -> Self {
         Self {
-            x: u.y * v.z - u.z * v.y,
-            y: u.z * v.x - u.x * v.z,
-            z: u.x * v.y - u.y * v.x,
+            x: self.y * v.z - self.z * v.y,
+            y: self.z * v.x - self.x * v.z,
+            z: self.x * v.y - self.y * v.x,
         }
     }
 

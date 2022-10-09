@@ -8,7 +8,7 @@ use std::{
     rc::Rc,
 };
 use utils::random_double;
-use vec3::Point3;
+use vec3::{Point3, Vec3};
 
 mod camera;
 mod colour;
@@ -52,7 +52,7 @@ fn main() {
     )));
     world.add(Rc::new(Sphere::new(
         Point3::new(-1.0, 0.0, -1.0),
-        -0.4,
+        -0.45,
         material_left,
     )));
     world.add(Rc::new(Sphere::new(
@@ -62,7 +62,13 @@ fn main() {
     )));
 
     // Camera
-    let camera = Camera::new();
+    let camera = Camera::new(
+        Point3::new(-2.0, 2.0, 1.0),
+        Point3::new(0.0, 0.0, -1.0),
+        Vec3::new(0.0, 1.0, 0.0),
+        20.0,
+        aspect_ratio,
+    );
 
     // Render
     let mut stdout = stdout();
