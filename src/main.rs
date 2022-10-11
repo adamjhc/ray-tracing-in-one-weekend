@@ -2,7 +2,7 @@ use camera::Camera;
 use colour::Colour;
 use hittable_list::HittableList;
 use indicatif::ParallelProgressIterator;
-use material::{Dielectric, Lambertian, Material, Metal};
+use material::{Dielectric, Lambertian, Metal};
 use moving_sphere::MovingSphere;
 use rayon::prelude::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 use sphere::Sphere;
