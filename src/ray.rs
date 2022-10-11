@@ -1,5 +1,3 @@
-use std::f64::INFINITY;
-
 use crate::{
     colour::Colour,
     hittable::HitRecord,
@@ -29,7 +27,7 @@ impl Ray {
         }
 
         let mut hit_record = HitRecord::default();
-        if world.hit(self, 0.001, INFINITY, &mut hit_record) {
+        if world.hit(self, 0.001, f64::INFINITY, &mut hit_record) {
             assert!(hit_record.material.is_some());
 
             let mut scattered = Ray::default();

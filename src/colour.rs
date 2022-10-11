@@ -14,7 +14,7 @@ impl Colour {
         Self { r, g, b }
     }
 
-    pub fn write(&mut self, samples_per_pixel: i32) -> String {
+    pub fn write_to_rgb(&mut self, samples_per_pixel: i32) -> String {
         // Divide the colour by the number of samples and gamma-correct for gamma=2.0
         let scale = 1.0 / samples_per_pixel as f64;
 

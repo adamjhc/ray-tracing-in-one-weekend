@@ -1,9 +1,11 @@
 use camera::Camera;
 use colour::Colour;
 use hittable_list::HittableList;
+use indicatif::ParallelProgressIterator;
 use material::{Dielectric, Lambertian, Material, Metal};
+use rayon::prelude::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 use sphere::Sphere;
-use std::rc::Rc;
+use std::sync::Arc;
 use utils::{random_double, random_double_within_range};
 use vec3::{Point3, Vec3};
 
@@ -46,30 +48,36 @@ fn main() {
     println!("{image_width} {image_height}");
     println!("255");
 
-    for row in (0..image_height).rev() {
-        eprint!("\rScanlines remaining: {row} ");
+    let colours = (0..image_height)
+        .into_par_iter()
+        .rev()
+        .progress_count(image_height as u64)
+        .flat_map(|row| {
+            (0..image_width)
+                .map(|col| {
+                    (0..samples_per_pixel).fold(Colour::default(), |pixel_colour, _| {
+                        let u = (col as f64 + random_double()) / (image_width - 1) as f64;
+                        let v = (row as f64 + random_double()) / (image_height - 1) as f64;
+                        let ray = camera.get_ray(u, v);
+                        pixel_colour + ray.ray_colour(&world, max_depth)
+                    })
+                })
+                .collect::<Vec<Colour>>()
+        })
+        .collect::<Vec<Colour>>();
 
-        for col in 0..image_width {
-            let mut pixel_colour = Colour::new(0.0, 0.0, 0.0);
-            for _ in 0..samples_per_pixel {
-                let u = (col as f64 + random_double()) / (image_width - 1) as f64;
-                let v = (row as f64 + random_double()) / (image_height - 1) as f64;
-                let ray = camera.get_ray(u, v);
-                pixel_colour += ray.ray_colour(&world, max_depth);
-            }
-
-            println!("{}", pixel_colour.write(samples_per_pixel));
-        }
+    eprint!("\rWriting to file...");
+    for mut pixel in colours {
+        println!("{}", pixel.write_to_rgb(samples_per_pixel));
     }
-
-    eprint!("\r");
+    eprint!("\r")
 }
 
 fn random_scene() -> HittableList {
     let mut world = HittableList::new();
 
-    let material_ground = Rc::new(Lambertian::new(Colour::new(0.5, 0.5, 0.5)));
-    world.add(Rc::new(Sphere::new(
+    let material_ground = Arc::new(Lambertian::new(Colour::new(0.5, 0.5, 0.5)));
+    world.add(Box::new(Sphere::new(
         Point3::new(0.0, -1000.0, 0.0),
         1000.0,
         material_ground,
@@ -85,41 +93,41 @@ fn random_scene() -> HittableList {
             );
 
             if (center - Point3::new(4.0, 0.2, 0.0)).length() > 0.9 {
-                let material_sphere: Rc<dyn Material> = if chosen_material < 0.8 {
+                let material_sphere: Arc<dyn Material> = if chosen_material < 0.8 {
                     // diffuse
                     let albedo = Colour::random();
-                    Rc::new(Lambertian::new(albedo))
+                    Arc::new(Lambertian::new(albedo))
                 } else if chosen_material < 0.95 {
                     // metal
                     let albedo = Colour::random_within_range(0.5, 1.0);
                     let fuzz = random_double_within_range(0.0, 0.5);
-                    Rc::new(Metal::new(albedo, fuzz))
+                    Arc::new(Metal::new(albedo, fuzz))
                 } else {
                     // glass
-                    Rc::new(Dielectric::new(1.5))
+                    Arc::new(Dielectric::new(1.5))
                 };
 
-                world.add(Rc::new(Sphere::new(center, 0.2, material_sphere)));
+                world.add(Box::new(Sphere::new(center, 0.2, material_sphere)));
             }
         }
     }
 
-    let material_glass = Rc::new(Dielectric::new(1.5));
-    world.add(Rc::new(Sphere::new(
+    let material_glass = Arc::new(Dielectric::new(1.5));
+    world.add(Box::new(Sphere::new(
         Point3::new(0.0, 1.0, 0.0),
         1.0,
         material_glass,
     )));
 
-    let material_diffuse = Rc::new(Lambertian::new(Colour::new(0.4, 0.2, 0.1)));
-    world.add(Rc::new(Sphere::new(
+    let material_diffuse = Arc::new(Lambertian::new(Colour::new(0.4, 0.2, 0.1)));
+    world.add(Box::new(Sphere::new(
         Point3::new(-4.0, 1.0, 0.0),
         1.0,
         material_diffuse,
     )));
 
-    let material_metal = Rc::new(Metal::new(Colour::new(0.7, 0.6, 0.5), 0.0));
-    world.add(Rc::new(Sphere::new(
+    let material_metal = Arc::new(Metal::new(Colour::new(0.7, 0.6, 0.5), 0.0));
+    world.add(Box::new(Sphere::new(
         Point3::new(4.0, 1.0, 0.0),
         1.0,
         material_metal,
