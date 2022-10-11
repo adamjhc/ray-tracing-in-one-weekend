@@ -114,7 +114,6 @@ fn random_scene() -> HittableList {
                     // metal
                     let albedo = Colour::random_within_range(0.5, 1.0);
                     let fuzz = random_double_within_range(0.0, 0.5);
-
                     world.add(Box::new(Sphere::new(
                         center,
                         0.2,
@@ -122,7 +121,6 @@ fn random_scene() -> HittableList {
                     )));
                 } else {
                     // glass
-
                     world.add(Box::new(Sphere::new(
                         center,
                         0.2,
