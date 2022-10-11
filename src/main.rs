@@ -3,6 +3,7 @@ use colour::Colour;
 use hittable_list::HittableList;
 use indicatif::ParallelProgressIterator;
 use material::{Dielectric, Lambertian, Material, Metal};
+use moving_sphere::MovingSphere;
 use rayon::prelude::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 use sphere::Sphere;
 use std::sync::Arc;
@@ -14,6 +15,7 @@ mod colour;
 mod hittable;
 mod hittable_list;
 mod material;
+mod moving_sphere;
 mod ray;
 mod sphere;
 mod utils;
@@ -22,7 +24,7 @@ mod vec3;
 fn main() {
     // Image
     let aspect_ratio = 16.0 / 9.0;
-    let image_width = 800;
+    let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
     let samples_per_pixel = 100;
     let max_depth = 50;
@@ -41,6 +43,8 @@ fn main() {
         aspect_ratio,
         0.1,
         10.0,
+        0.0,
+        1.0,
     );
 
     // Render
@@ -93,21 +97,38 @@ fn random_scene() -> HittableList {
             );
 
             if (center - Point3::new(4.0, 0.2, 0.0)).length() > 0.9 {
-                let material_sphere: Arc<dyn Material> = if chosen_material < 0.8 {
+                if chosen_material < 0.8 {
                     // diffuse
                     let albedo = Colour::random();
-                    Arc::new(Lambertian::new(albedo))
+                    let center2 =
+                        center + Vec3::new(0.0, random_double_within_range(0.0, 0.5), 0.0);
+                    world.add(Box::new(MovingSphere::new(
+                        center,
+                        center2,
+                        0.0,
+                        1.0,
+                        0.2,
+                        Arc::new(Lambertian::new(albedo)),
+                    )));
                 } else if chosen_material < 0.95 {
                     // metal
                     let albedo = Colour::random_within_range(0.5, 1.0);
                     let fuzz = random_double_within_range(0.0, 0.5);
-                    Arc::new(Metal::new(albedo, fuzz))
+
+                    world.add(Box::new(Sphere::new(
+                        center,
+                        0.2,
+                        Arc::new(Metal::new(albedo, fuzz)),
+                    )));
                 } else {
                     // glass
-                    Arc::new(Dielectric::new(1.5))
-                };
 
-                world.add(Box::new(Sphere::new(center, 0.2, material_sphere)));
+                    world.add(Box::new(Sphere::new(
+                        center,
+                        0.2,
+                        Arc::new(Dielectric::new(1.5)),
+                    )));
+                };
             }
         }
     }

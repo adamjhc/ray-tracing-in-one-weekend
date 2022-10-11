@@ -3,7 +3,7 @@ use crate::{colour::Colour, hittable::HitRecord, ray::Ray, utils::random_double,
 pub trait Material: Sync + Send {
     fn scatter(
         &self,
-        r_in: &Ray,
+        ray_in: &Ray,
         hit_record: &HitRecord,
         attenuation: &mut Colour,
         scattered: &mut Ray,
@@ -23,7 +23,7 @@ impl Lambertian {
 impl Material for Lambertian {
     fn scatter(
         &self,
-        _r_in: &Ray,
+        ray_in: &Ray,
         hit_record: &HitRecord,
         attenuation: &mut Colour,
         scattered: &mut Ray,
@@ -35,7 +35,7 @@ impl Material for Lambertian {
             scatter_direction = hit_record.normal;
         }
 
-        *scattered = Ray::new(hit_record.p, scatter_direction);
+        *scattered = Ray::new(hit_record.p, scatter_direction, ray_in.time);
         *attenuation = self.albedo;
         true
     }
@@ -55,15 +55,16 @@ impl Metal {
 impl Material for Metal {
     fn scatter(
         &self,
-        r_in: &Ray,
+        ray_in: &Ray,
         hit_record: &HitRecord,
         attenuation: &mut Colour,
         scattered: &mut Ray,
     ) -> bool {
-        let reflected = r_in.direction.unit_vector().reflect(&hit_record.normal);
+        let reflected = ray_in.direction.unit_vector().reflect(&hit_record.normal);
         *scattered = Ray::new(
             hit_record.p,
             reflected + self.fuzz * Vec3::random_in_unit_sphere(),
+            ray_in.time,
         );
         *attenuation = self.albedo;
         scattered.direction.dot(&hit_record.normal) > 0.0
@@ -90,7 +91,7 @@ impl Dielectric {
 impl Material for Dielectric {
     fn scatter(
         &self,
-        r_in: &Ray,
+        ray_in: &Ray,
         hit_record: &HitRecord,
         attenuation: &mut Colour,
         scattered: &mut Ray,
@@ -102,7 +103,7 @@ impl Material for Dielectric {
             self.refraction_index
         };
 
-        let unit_direction = r_in.direction.unit_vector();
+        let unit_direction = ray_in.direction.unit_vector();
         let cos_theta = (-unit_direction).dot(&hit_record.normal).min(1.0);
         let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
 
@@ -114,7 +115,7 @@ impl Material for Dielectric {
                 unit_direction.refract(&hit_record.normal, refraction_ratio)
             };
 
-        *scattered = Ray::new(hit_record.p, direction);
+        *scattered = Ray::new(hit_record.p, direction, ray_in.time);
         true
     }
 }
