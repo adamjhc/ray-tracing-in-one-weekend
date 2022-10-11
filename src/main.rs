@@ -3,10 +3,7 @@ use colour::Colour;
 use hittable_list::HittableList;
 use material::{Dielectric, Lambertian, Material, Metal};
 use sphere::Sphere;
-use std::{
-    io::{stderr, stdout, Write},
-    rc::Rc,
-};
+use std::rc::Rc;
 use utils::{random_double, random_double_within_range};
 use vec3::{Point3, Vec3};
 
