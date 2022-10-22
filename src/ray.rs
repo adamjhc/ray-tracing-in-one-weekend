@@ -1,6 +1,5 @@
 use crate::{
     colour::Colour,
-    hittable::HitRecord,
     hittable_list::HittableList,
     vec3::{Point3, Vec3},
 };
@@ -31,8 +30,7 @@ impl Ray {
             return Colour::default();
         }
 
-        let mut hit_record = HitRecord::default();
-        if world.hit(self, 0.001, f64::INFINITY, &mut hit_record) {
+        if let Some(hit_record) = world.hit(self, 0.001, f64::INFINITY) {
             assert!(hit_record.material.is_some());
 
             let mut scattered = Ray::default();

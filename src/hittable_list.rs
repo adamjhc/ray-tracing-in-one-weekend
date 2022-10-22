@@ -1,10 +1,13 @@
+use std::sync::Arc;
+
 use crate::{
+    aabb::Aabb,
     hittable::{HitRecord, Hittable},
     ray::Ray,
 };
 
 pub struct HittableList {
-    objects: Vec<Box<dyn Hittable>>,
+    objects: Vec<Arc<dyn Hittable>>,
 }
 
 impl HittableList {
@@ -14,23 +17,44 @@ impl HittableList {
         }
     }
 
-    pub fn add(&mut self, object: Box<dyn Hittable>) {
+    pub fn push(&mut self, object: Arc<dyn Hittable>) {
         self.objects.push(object);
     }
 
-    pub fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hit_record: &mut HitRecord) -> bool {
-        let mut temp_rec = HitRecord::default();
-        let mut hit_anything = false;
+    pub fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let mut closest_so_far = t_max;
+        let mut hit_record = None;
 
         for object in self.objects.iter() {
-            if object.hit(ray, t_min, closest_so_far, &mut temp_rec) {
-                hit_anything = true;
+            if let Some(temp_rec) = object.hit(ray, t_min, closest_so_far) {
                 closest_so_far = temp_rec.t;
-                *hit_record = temp_rec.clone();
+                hit_record = Some(temp_rec);
             }
         }
 
-        hit_anything
+        hit_record
+    }
+
+    pub fn bounding_box(&self, time_0: f64, time_1: f64) -> Option<Aabb> {
+        if self.objects.is_empty() {
+            return None;
+        }
+
+        let mut first_box = true;
+        let mut bounding_box = None;
+        for object in self.objects.iter() {
+            if let Some(temp_box) = object.bounding_box(time_0, time_1) {
+                bounding_box = if first_box {
+                    Some(temp_box)
+                } else {
+                    Some(bounding_box?.surrounding_box(&temp_box))
+                };
+                first_box = false;
+            } else {
+                return None;
+            }
+        }
+
+        bounding_box
     }
 }

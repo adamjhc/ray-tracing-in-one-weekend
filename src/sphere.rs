@@ -1,10 +1,11 @@
 use std::sync::Arc;
 
 use crate::{
+    aabb::Aabb,
     hittable::{HitRecord, Hittable},
     material::Material,
     ray::Ray,
-    vec3::Point3,
+    vec3::{Point3, Vec3},
 };
 
 pub struct Sphere {
@@ -24,7 +25,7 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hit_record: &mut HitRecord) -> bool {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let oc = ray.origin - self.center;
         let a = ray.direction.length_squared();
         let half_b = oc.dot(&ray.direction);
@@ -32,7 +33,7 @@ impl Hittable for Sphere {
 
         let discriminant = half_b * half_b - a * c;
         if discriminant < 0.0 {
-            return false;
+            return None;
         }
         let sqrtd = discriminant.sqrt();
 
@@ -41,16 +42,24 @@ impl Hittable for Sphere {
         if root < t_min || t_max < root {
             root = (-half_b + sqrtd) / a;
             if root < t_min || t_max < root {
-                return false;
+                return None;
             }
         }
 
-        hit_record.t = root;
-        hit_record.p = ray.at(hit_record.t);
-        let outward_normal = (hit_record.p - self.center) / self.radius;
-        hit_record.set_face_normal(ray, outward_normal);
-        hit_record.material = Some(self.material.clone());
+        let p = ray.at(root);
+        Some(HitRecord::new(
+            p,
+            root,
+            ray,
+            (p - self.center) / self.radius,
+            Some(self.material.clone()),
+        ))
+    }
 
-        true
+    fn bounding_box(&self, _time_0: f64, _time_1: f64) -> Option<Aabb> {
+        Some(Aabb::new(
+            self.center - Vec3::new(self.radius, self.radius, self.radius),
+            self.center + Vec3::new(self.radius, self.radius, self.radius),
+        ))
     }
 }

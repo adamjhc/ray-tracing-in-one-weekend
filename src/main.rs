@@ -10,6 +10,8 @@ use std::sync::Arc;
 use utils::{random_double, random_double_within_range};
 use vec3::{Point3, Vec3};
 
+mod aabb;
+mod bvh;
 mod camera;
 mod colour;
 mod hittable;
@@ -81,7 +83,7 @@ fn random_scene() -> HittableList {
     let mut world = HittableList::new();
 
     let material_ground = Arc::new(Lambertian::new(Colour::new(0.5, 0.5, 0.5)));
-    world.add(Box::new(Sphere::new(
+    world.push(Arc::new(Sphere::new(
         Point3::new(0.0, -1000.0, 0.0),
         1000.0,
         material_ground,
@@ -102,7 +104,7 @@ fn random_scene() -> HittableList {
                     let albedo = Colour::random();
                     let center2 =
                         center + Vec3::new(0.0, random_double_within_range(0.0, 0.5), 0.0);
-                    world.add(Box::new(MovingSphere::new(
+                    world.push(Arc::new(MovingSphere::new(
                         center,
                         center2,
                         0.0,
@@ -114,14 +116,14 @@ fn random_scene() -> HittableList {
                     // metal
                     let albedo = Colour::random_within_range(0.5, 1.0);
                     let fuzz = random_double_within_range(0.0, 0.5);
-                    world.add(Box::new(Sphere::new(
+                    world.push(Arc::new(Sphere::new(
                         center,
                         0.2,
                         Arc::new(Metal::new(albedo, fuzz)),
                     )));
                 } else {
                     // glass
-                    world.add(Box::new(Sphere::new(
+                    world.push(Arc::new(Sphere::new(
                         center,
                         0.2,
                         Arc::new(Dielectric::new(1.5)),
@@ -132,21 +134,21 @@ fn random_scene() -> HittableList {
     }
 
     let material_glass = Arc::new(Dielectric::new(1.5));
-    world.add(Box::new(Sphere::new(
+    world.push(Arc::new(Sphere::new(
         Point3::new(0.0, 1.0, 0.0),
         1.0,
         material_glass,
     )));
 
     let material_diffuse = Arc::new(Lambertian::new(Colour::new(0.4, 0.2, 0.1)));
-    world.add(Box::new(Sphere::new(
+    world.push(Arc::new(Sphere::new(
         Point3::new(-4.0, 1.0, 0.0),
         1.0,
         material_diffuse,
     )));
 
     let material_metal = Arc::new(Metal::new(Colour::new(0.7, 0.6, 0.5), 0.0));
-    world.add(Box::new(Sphere::new(
+    world.push(Arc::new(Sphere::new(
         Point3::new(4.0, 1.0, 0.0),
         1.0,
         material_metal,
