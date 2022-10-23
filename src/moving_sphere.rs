@@ -4,6 +4,7 @@ use crate::{
     aabb::Aabb,
     hittable::{HitRecord, Hittable},
     material::Material,
+    sphere::Sphere,
     vec3::{Point3, Vec3},
 };
 
@@ -65,11 +66,15 @@ impl Hittable for MovingSphere {
         }
 
         let p = ray.at(root);
+        let outward_normal = (p - self.center_at(ray.time)) / self.radius;
+        let (u, v) = Sphere::get_sphere_uv(&outward_normal);
         Some(HitRecord::new(
             p,
             root,
+            u,
+            v,
             ray,
-            (p - self.center_at(ray.time)) / self.radius,
+            outward_normal,
             Some(self.material.clone()),
         ))
     }

@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{f64::consts::PI, sync::Arc};
 
 use crate::{
     aabb::Aabb,
@@ -21,6 +21,20 @@ impl Sphere {
             radius,
             material,
         }
+    }
+
+    pub fn get_sphere_uv(p: &Point3) -> (f64, f64) {
+        // p: a given on the sphere of a radius one, centered at the origin
+        // u: returned value [0,1] of angle around the Y axis from X=-1
+        // v: returned value [0,1] of angle from Y=-1 to Y=+1
+        //     <1 0 0> yields <0.50 0.50>       <-1  0  0> yields <0.00 0.50>
+        //     <0 1 0> yields <0.50 1.00>       < 0 -1  0> yields <0.50 0.00>
+        //     <0 0 1> yields <0.25 0.50>       < 0  0 -1> yields <0.75 0.50>
+
+        let theta = (-p.y).acos();
+        let phi = (-p.z).atan2(p.x) + PI;
+
+        (phi / (2.0 * PI), theta / PI)
     }
 }
 
@@ -47,11 +61,15 @@ impl Hittable for Sphere {
         }
 
         let p = ray.at(root);
+        let outward_normal = (p - self.center) / self.radius;
+        let (u, v) = Sphere::get_sphere_uv(&outward_normal);
         Some(HitRecord::new(
             p,
             root,
+            u,
+            v,
             ray,
-            (p - self.center) / self.radius,
+            outward_normal,
             Some(self.material.clone()),
         ))
     }
