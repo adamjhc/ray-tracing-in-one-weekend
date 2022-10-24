@@ -1,7 +1,7 @@
 use crate::{
     colour::Colour,
-    hittable_list::HittableList,
     vec3::{Point3, Vec3},
+    world::World,
 };
 
 #[derive(Default)]
@@ -24,31 +24,31 @@ impl Ray {
         self.origin + t * self.direction
     }
 
-    pub fn ray_colour(&self, world: &HittableList, depth: i32) -> Colour {
+    pub fn ray_colour(&self, world: &World, depth: i32) -> Colour {
         // If we've exceeded the ray bounce limit, no more light is gathered
         if depth <= 0 {
             return Colour::default();
         }
 
-        if let Some(hit_record) = world.hit(self, 0.001, f64::INFINITY) {
-            assert!(hit_record.material.is_some());
+        if let Some(hit_record) = world.objects.hit(self, 0.001, f64::INFINITY) {
+            let emitted = hit_record.material.as_ref().unwrap().emitted(
+                hit_record.u,
+                hit_record.v,
+                &hit_record.p,
+            );
 
-            let mut scattered = Ray::default();
-            let mut attenuation = Colour::default();
-            return if hit_record.material.as_ref().unwrap().scatter(
-                self,
-                &hit_record,
-                &mut attenuation,
-                &mut scattered,
-            ) {
-                attenuation * scattered.ray_colour(world, depth - 1)
+            if let Some((attenuation, scattered)) = hit_record
+                .material
+                .as_ref()
+                .unwrap()
+                .scatter(self, &hit_record)
+            {
+                emitted + attenuation * scattered.ray_colour(world, depth - 1)
             } else {
-                Colour::default()
-            };
+                emitted
+            }
+        } else {
+            world.background
         }
-
-        let unit_direction = self.direction.unit_vector();
-        let t = 0.5 * (unit_direction.y + 1.0);
-        (1.0 - t) * Colour::new(1.0, 1.0, 1.0) + t * Colour::new(0.5, 0.7, 1.0)
     }
 }

@@ -1,10 +1,5 @@
 use crate::{colour::Colour, perlin::Perlin, vec3::Point3};
-use std::{
-    fs::File,
-    io::BufReader,
-    path::{self, Path},
-    sync::Arc,
-};
+use std::{path::Path, sync::Arc};
 
 pub trait Texture: Send + Sync {
     fn value(&self, u: f64, v: f64, p: Point3) -> Colour;

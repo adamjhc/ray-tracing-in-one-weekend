@@ -1,15 +1,18 @@
 use crate::scene::Scene;
+use clap::{arg, Parser};
 use colour::Colour;
-use indicatif::ParallelProgressIterator;
+use indicatif::{ParallelProgressIterator, ProgressIterator};
 use rand::random;
 use rayon::prelude::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 
 mod aabb;
+mod aarect;
 mod bvh;
 mod camera;
 mod colour;
 mod hittable;
 mod hittable_list;
+mod image;
 mod material;
 mod moving_sphere;
 mod perlin;
@@ -19,44 +22,44 @@ mod sphere;
 mod texture;
 mod utils;
 mod vec3;
+mod world;
+
+#[derive(Parser)]
+struct Args {
+    #[arg(value_enum)]
+    pub scene: Scene,
+}
 
 fn main() {
-    // Image
-    let aspect_ratio = 16.0 / 9.0;
-    let image_width = 400;
-    let image_height = (image_width as f64 / aspect_ratio) as i32;
-    let samples_per_pixel = 100;
-    let max_depth = 50;
+    let args = Args::parse();
 
-    // World and camera
-    let (world, camera) = Scene::get(4, aspect_ratio);
+    let (image, camera, world) = args.scene.get();
 
     // Render
     println!("P3");
-    println!("{image_width} {image_height}");
+    println!("{} {}", image.width, image.height);
     println!("255");
 
-    let colours = (0..image_height)
+    let colours = (0..image.height)
         .into_par_iter()
         .rev()
-        .progress_count(image_height as u64)
+        .progress_count(image.height as u64)
         .flat_map(|row| {
-            (0..image_width)
+            (0..image.width)
                 .map(|col| {
-                    (0..samples_per_pixel).fold(Colour::default(), |pixel_colour, _| {
-                        let u = (col as f64 + random::<f64>()) / (image_width - 1) as f64;
-                        let v = (row as f64 + random::<f64>()) / (image_height - 1) as f64;
+                    (0..image.samples_per_pixel).fold(Colour::default(), |pixel_colour, _| {
+                        let u = (col as f64 + random::<f64>()) / (image.width - 1) as f64;
+                        let v = (row as f64 + random::<f64>()) / (image.height - 1) as f64;
                         let ray = camera.get_ray(u, v);
-                        pixel_colour + ray.ray_colour(&world, max_depth)
+                        pixel_colour + ray.ray_colour(&world, image.max_depth)
                     })
                 })
                 .collect::<Vec<Colour>>()
         })
         .collect::<Vec<Colour>>();
 
-    eprint!("\rWriting to file...");
-    for mut pixel in colours {
-        println!("{}", pixel.write_to_rgb(samples_per_pixel));
-    }
-    eprint!("\r")
+    colours
+        .iter()
+        .progress()
+        .for_each(|pixel| println!("{}", pixel.write_to_rgb(image.samples_per_pixel)));
 }

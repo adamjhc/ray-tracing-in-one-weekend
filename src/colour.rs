@@ -13,20 +13,20 @@ impl Colour {
         Self { r, g, b }
     }
 
-    pub fn write_to_rgb(&mut self, samples_per_pixel: i32) -> String {
+    pub fn write_to_rgb(&self, samples_per_pixel: i32) -> String {
         // Divide the colour by the number of samples and gamma-correct for gamma=2.0
         let scale = 1.0 / samples_per_pixel as f64;
 
-        self.r = (scale * self.r).sqrt();
-        self.g = (scale * self.g).sqrt();
-        self.b = (scale * self.b).sqrt();
+        let r = (scale * self.r).sqrt();
+        let g = (scale * self.g).sqrt();
+        let b = (scale * self.b).sqrt();
 
         // Write the translated [0, 255] value of each colour component
         format!(
             "{} {} {}",
-            (256.0 * self.r.clamp(0.0, 0.999)) as i32,
-            (256.0 * self.g.clamp(0.0, 0.999)) as i32,
-            (256.0 * self.b.clamp(0.0, 0.999)) as i32,
+            (256.0 * r.clamp(0.0, 0.999)) as i32,
+            (256.0 * g.clamp(0.0, 0.999)) as i32,
+            (256.0 * b.clamp(0.0, 0.999)) as i32,
         )
     }
 

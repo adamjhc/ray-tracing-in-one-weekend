@@ -15,6 +15,14 @@ pub struct Camera {
     lens_radius: f64,
     shutter_open_time: f64,
     shutter_close_time: f64,
+    //
+    look_from: Point3,
+    look_at: Point3,
+    view_up: Vec3,
+    vertical_field_of_view_degrees: f64,
+    aspect_ratio: f64,
+    aperture: f64,
+    focus_distance: f64,
 }
 
 impl Camera {
@@ -22,14 +30,14 @@ impl Camera {
         look_from: Point3,
         look_at: Point3,
         view_up: Vec3,
-        vertical_field_of_view_in_degrees: f64,
+        vertical_field_of_view_degrees: f64,
         aspect_ratio: f64,
         aperture: f64,
         focus_distance: f64,
         shutter_open_time: f64,
         shutter_close_time: f64,
     ) -> Self {
-        let theta = degrees_to_radians(vertical_field_of_view_in_degrees);
+        let theta = degrees_to_radians(vertical_field_of_view_degrees);
         let h = (theta / 2.0).tan();
         let viewport_height = 2.0 * h;
         let viewport_width = aspect_ratio * viewport_height;
@@ -52,6 +60,13 @@ impl Camera {
             lens_radius: aperture / 2.0,
             shutter_open_time,
             shutter_close_time,
+            look_from,
+            look_at,
+            view_up,
+            vertical_field_of_view_degrees,
+            aspect_ratio,
+            aperture,
+            focus_distance,
         }
     }
 
@@ -63,6 +78,76 @@ impl Camera {
             self.origin + offset,
             self.lower_left_corner + s * self.horizontal + t * self.vertical - self.origin - offset,
             thread_rng().gen_range(self.shutter_open_time..=self.shutter_close_time),
+        )
+    }
+
+    pub fn set_look_from(self, look_from: Point3) -> Self {
+        Self::new(
+            look_from,
+            self.look_at,
+            self.view_up,
+            self.vertical_field_of_view_degrees,
+            self.aspect_ratio,
+            self.aperture,
+            self.focus_distance,
+            self.shutter_open_time,
+            self.shutter_close_time,
+        )
+    }
+
+    pub fn set_look_at(self, look_at: Point3) -> Self {
+        Self::new(
+            self.look_from,
+            look_at,
+            self.view_up,
+            self.vertical_field_of_view_degrees,
+            self.aspect_ratio,
+            self.aperture,
+            self.focus_distance,
+            self.shutter_open_time,
+            self.shutter_close_time,
+        )
+    }
+
+    pub fn set_vertical_field_of_view_degrees(self, vertical_field_of_view_degrees: f64) -> Self {
+        Self::new(
+            self.look_from,
+            self.look_at,
+            self.view_up,
+            vertical_field_of_view_degrees,
+            self.aspect_ratio,
+            self.aperture,
+            self.focus_distance,
+            self.shutter_open_time,
+            self.shutter_close_time,
+        )
+    }
+
+    pub fn set_aspect_ratio(self, aspect_ratio: f64) -> Self {
+        Self::new(
+            self.look_from,
+            self.look_at,
+            self.view_up,
+            self.vertical_field_of_view_degrees,
+            aspect_ratio,
+            self.aperture,
+            self.focus_distance,
+            self.shutter_open_time,
+            self.shutter_close_time,
+        )
+    }
+
+    pub fn set_aperature(self, aperture: f64) -> Self {
+        Self::new(
+            self.look_from,
+            self.look_at,
+            self.view_up,
+            self.vertical_field_of_view_degrees,
+            self.aspect_ratio,
+            aperture,
+            self.focus_distance,
+            self.shutter_open_time,
+            self.shutter_close_time,
         )
     }
 }
