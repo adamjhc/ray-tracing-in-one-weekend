@@ -1,5 +1,10 @@
 use crate::{colour::Colour, perlin::Perlin, vec3::Point3};
-use std::sync::Arc;
+use std::{
+    fs::File,
+    io::BufReader,
+    path::{self, Path},
+    sync::Arc,
+};
 
 pub trait Texture: Send + Sync {
     fn value(&self, u: f64, v: f64, p: Point3) -> Colour;
@@ -72,5 +77,57 @@ impl Texture for NoiseTexture {
         Colour::new(1.0, 1.0, 1.0)
             * 0.5
             * (1.0 + (self.scale * p.z + 10.0 * self.noise.turbulence(&(self.scale * p), 7)).sin())
+    }
+}
+
+pub struct ImageTexture {
+    data: Vec<u8>,
+    width: usize,
+    height: usize,
+    bytes_per_scanline: usize,
+}
+
+impl ImageTexture {
+    const BYTES_PER_PIXEL: usize = 3;
+
+    pub fn new(filename: &Path) -> Self {
+        let image = image::open(filename)
+            .expect("Could not load texture image file")
+            .to_rgb8();
+
+        let (width, height) = image.dimensions();
+
+        Self {
+            data: image.into_raw(),
+            width: width as usize,
+            height: height as usize,
+            bytes_per_scanline: Self::BYTES_PER_PIXEL * width as usize,
+        }
+    }
+}
+
+impl Texture for ImageTexture {
+    fn value(&self, mut u: f64, mut v: f64, _p: Point3) -> Colour {
+        u = u.clamp(0.0, 1.0);
+        v = 1.0 - v.clamp(0.0, 1.0);
+
+        let mut i = (u * self.width as f64) as usize;
+        let mut j = (v * self.height as f64) as usize;
+
+        if i >= self.width {
+            i = self.width - 1;
+        }
+        if j >= self.height {
+            j = self.height - 1;
+        }
+
+        let colour_scale = 1.0 / 255.0;
+        let pixel_location = j * self.bytes_per_scanline + i * Self::BYTES_PER_PIXEL;
+
+        Colour::new(
+            colour_scale * self.data[pixel_location] as f64,
+            colour_scale * self.data[pixel_location + 1] as f64,
+            colour_scale * self.data[pixel_location + 2] as f64,
+        )
     }
 }

@@ -29,7 +29,7 @@ fn main() {
     let max_depth = 50;
 
     // World and camera
-    let (world, camera) = Scene::get(3, aspect_ratio);
+    let (world, camera) = Scene::get(4, aspect_ratio);
 
     // Render
     println!("P3");

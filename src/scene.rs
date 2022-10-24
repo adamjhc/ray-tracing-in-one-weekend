@@ -5,11 +5,11 @@ use crate::{
     material::{Dielectric, Lambertian, Metal},
     moving_sphere::MovingSphere,
     sphere::Sphere,
-    texture::{CheckerTexture, NoiseTexture},
+    texture::{CheckerTexture, ImageTexture, NoiseTexture},
     vec3::{Point3, Vec3},
 };
 use rand::{random, thread_rng, Rng};
-use std::sync::Arc;
+use std::{path::Path, sync::Arc};
 
 pub struct Scene;
 
@@ -46,6 +46,20 @@ impl Scene {
             ),
             3 => (
                 Self::two_perlin_spheres(),
+                Camera::new(
+                    Point3::new(13.0, 2.0, 3.0),
+                    Point3::new(0.0, 0.0, 0.0),
+                    Vec3::new(0.0, 1.0, 0.0),
+                    20.0,
+                    aspect_ratio,
+                    0.0,
+                    10.0,
+                    0.0,
+                    1.0,
+                ),
+            ),
+            4 => (
+                Self::earth(),
                 Camera::new(
                     Point3::new(13.0, 2.0, 3.0),
                     Point3::new(0.0, 0.0, 0.0),
@@ -177,6 +191,17 @@ impl Scene {
         )));
         objects.push(Arc::new(Sphere::new(Vec3::new(0.0, 2.0, 0.0), 2.0, noise)));
 
+        objects
+    }
+
+    fn earth() -> HittableList {
+        let earth_surface = Arc::new(Lambertian::new(Arc::new(ImageTexture::new(Path::new(
+            "earthmap.jpg",
+        )))));
+        let globe = Arc::new(Sphere::new(Vec3::new(0.0, 0.0, 0.0), 2.0, earth_surface));
+
+        let mut objects = HittableList::new();
+        objects.push(globe);
         objects
     }
 }
