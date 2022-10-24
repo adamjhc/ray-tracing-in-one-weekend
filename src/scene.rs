@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::{
     camera::Camera,
     colour::Colour,
@@ -7,10 +5,11 @@ use crate::{
     material::{Dielectric, Lambertian, Metal},
     moving_sphere::MovingSphere,
     sphere::Sphere,
-    texture::CheckerTexture,
-    utils::{random_double, random_double_within_range},
+    texture::{CheckerTexture, NoiseTexture},
     vec3::{Point3, Vec3},
 };
+use rand::{random, thread_rng, Rng};
+use std::sync::Arc;
 
 pub struct Scene;
 
@@ -20,7 +19,7 @@ impl Scene {
             1 => (
                 Self::random_scene(),
                 Camera::new(
-                    Point3::new(13.0, 2.0, 2.0),
+                    Point3::new(13.0, 2.0, 3.0),
                     Point3::new(0.0, 0.0, 0.0),
                     Vec3::new(0.0, 1.0, 0.0),
                     20.0,
@@ -34,7 +33,21 @@ impl Scene {
             2 => (
                 Self::two_spheres(),
                 Camera::new(
-                    Point3::new(13.0, 2.0, 2.0),
+                    Point3::new(13.0, 2.0, 3.0),
+                    Point3::new(0.0, 0.0, 0.0),
+                    Vec3::new(0.0, 1.0, 0.0),
+                    20.0,
+                    aspect_ratio,
+                    0.0,
+                    10.0,
+                    0.0,
+                    1.0,
+                ),
+            ),
+            3 => (
+                Self::two_perlin_spheres(),
+                Camera::new(
+                    Point3::new(13.0, 2.0, 3.0),
                     Point3::new(0.0, 0.0, 0.0),
                     Vec3::new(0.0, 1.0, 0.0),
                     20.0,
@@ -64,11 +77,11 @@ impl Scene {
 
         for a in -11..11 {
             for b in -11..11 {
-                let chosen_material = random_double();
+                let chosen_material = random::<f64>();
                 let center = Point3::new(
-                    a as f64 + 0.9 * random_double(),
+                    a as f64 + 0.9 * random::<f64>(),
                     0.2,
-                    b as f64 + 0.9 * random_double(),
+                    b as f64 + 0.9 * random::<f64>(),
                 );
 
                 if (center - Point3::new(4.0, 0.2, 0.0)).length() > 0.9 {
@@ -76,7 +89,7 @@ impl Scene {
                         // diffuse
                         let albedo = Colour::random();
                         let center2 =
-                            center + Vec3::new(0.0, random_double_within_range(0.0, 0.5), 0.0);
+                            center + Vec3::new(0.0, thread_rng().gen_range(0.0..=0.5), 0.0);
                         world.push(Arc::new(MovingSphere::new(
                             center,
                             center2,
@@ -88,7 +101,7 @@ impl Scene {
                     } else if chosen_material < 0.95 {
                         // metal
                         let albedo = Colour::random_within_range(0.5, 1.0);
-                        let fuzz = random_double_within_range(0.0, 0.5);
+                        let fuzz = thread_rng().gen_range(0.0..=0.5);
                         world.push(Arc::new(Sphere::new(
                             center,
                             0.2,
@@ -148,6 +161,21 @@ impl Scene {
             10.0,
             checker,
         )));
+
+        objects
+    }
+
+    fn two_perlin_spheres() -> HittableList {
+        let mut objects = HittableList::new();
+
+        let noise = Arc::new(Lambertian::new(Arc::new(NoiseTexture::new(4.0))));
+
+        objects.push(Arc::new(Sphere::new(
+            Point3::new(0.0, -1000.0, 0.0),
+            1000.0,
+            noise.clone(),
+        )));
+        objects.push(Arc::new(Sphere::new(Vec3::new(0.0, 2.0, 0.0), 2.0, noise)));
 
         objects
     }

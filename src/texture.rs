@@ -1,6 +1,5 @@
+use crate::{colour::Colour, perlin::Perlin, vec3::Point3};
 use std::sync::Arc;
-
-use crate::{colour::Colour, vec3::Point3};
 
 pub trait Texture: Send + Sync {
     fn value(&self, u: f64, v: f64, p: Point3) -> Colour;
@@ -11,12 +10,6 @@ pub struct SolidColour {
 }
 
 impl SolidColour {
-    pub fn new(red: f64, green: f64, blue: f64) -> Self {
-        Self {
-            colour_value: Colour::new(red, green, blue),
-        }
-    }
-
     pub fn from(colour: Colour) -> Self {
         Self {
             colour_value: colour,
@@ -57,5 +50,27 @@ impl Texture for CheckerTexture {
         } else {
             self.even.value(u, v, p)
         }
+    }
+}
+
+pub struct NoiseTexture {
+    noise: Perlin,
+    scale: f64,
+}
+
+impl NoiseTexture {
+    pub fn new(scale: f64) -> Self {
+        Self {
+            noise: Perlin::new(),
+            scale,
+        }
+    }
+}
+
+impl Texture for NoiseTexture {
+    fn value(&self, _u: f64, _v: f64, p: Point3) -> Colour {
+        Colour::new(1.0, 1.0, 1.0)
+            * 0.5
+            * (1.0 + (self.scale * p.z + 10.0 * self.noise.turbulence(&(self.scale * p), 7)).sin())
     }
 }

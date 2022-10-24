@@ -1,11 +1,10 @@
-use std::sync::Arc;
-
 use crate::{
     aabb::Aabb,
     material::Material,
     ray::Ray,
     vec3::{Point3, Vec3},
 };
+use std::sync::Arc;
 
 pub trait Hittable: Sync + Send {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;

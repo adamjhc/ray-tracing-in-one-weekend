@@ -1,10 +1,9 @@
-use std::sync::Arc;
-
 use crate::{
     aabb::Aabb,
     hittable::{HitRecord, Hittable},
     ray::Ray,
 };
+use std::sync::Arc;
 
 pub struct HittableList {
     objects: Vec<Arc<dyn Hittable>>,

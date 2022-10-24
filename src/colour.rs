@@ -1,6 +1,5 @@
+use rand::{random, thread_rng, Rng};
 use std::ops::{Add, AddAssign, Mul};
-
-use crate::utils::{random_double, random_double_within_range};
 
 #[derive(Default, Clone, Copy)]
 pub struct Colour {
@@ -32,14 +31,15 @@ impl Colour {
     }
 
     pub fn random() -> Self {
-        Self::new(random_double(), random_double(), random_double())
+        Self::new(random(), random(), random())
     }
 
     pub fn random_within_range(min: f64, max: f64) -> Self {
+        let mut thread_rng = thread_rng();
         Self::new(
-            random_double_within_range(min, max),
-            random_double_within_range(min, max),
-            random_double_within_range(min, max),
+            thread_rng.gen_range(min..=max),
+            thread_rng.gen_range(min..=max),
+            thread_rng.gen_range(min..=max),
         )
     }
 }

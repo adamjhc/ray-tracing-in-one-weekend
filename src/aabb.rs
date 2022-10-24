@@ -1,6 +1,5 @@
-use std::mem::swap;
-
 use crate::{ray::Ray, vec3::Point3};
+use std::mem::swap;
 
 #[derive(Clone, Copy)]
 pub struct Aabb {

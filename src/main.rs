@@ -1,9 +1,8 @@
+use crate::scene::Scene;
 use colour::Colour;
 use indicatif::ParallelProgressIterator;
+use rand::random;
 use rayon::prelude::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
-use utils::random_double;
-
-use crate::scene::Scene;
 
 mod aabb;
 mod bvh;
@@ -13,6 +12,7 @@ mod hittable;
 mod hittable_list;
 mod material;
 mod moving_sphere;
+mod perlin;
 mod ray;
 mod scene;
 mod sphere;
@@ -29,7 +29,7 @@ fn main() {
     let max_depth = 50;
 
     // World and camera
-    let (world, camera) = Scene::get(2, aspect_ratio);
+    let (world, camera) = Scene::get(3, aspect_ratio);
 
     // Render
     println!("P3");
@@ -44,8 +44,8 @@ fn main() {
             (0..image_width)
                 .map(|col| {
                     (0..samples_per_pixel).fold(Colour::default(), |pixel_colour, _| {
-                        let u = (col as f64 + random_double()) / (image_width - 1) as f64;
-                        let v = (row as f64 + random_double()) / (image_height - 1) as f64;
+                        let u = (col as f64 + random::<f64>()) / (image_width - 1) as f64;
+                        let v = (row as f64 + random::<f64>()) / (image_height - 1) as f64;
                         let ray = camera.get_ray(u, v);
                         pixel_colour + ray.ray_colour(&world, max_depth)
                     })

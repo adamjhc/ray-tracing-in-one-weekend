@@ -1,13 +1,12 @@
-use std::sync::Arc;
-
 use crate::{
     colour::Colour,
     hittable::HitRecord,
     ray::Ray,
     texture::{SolidColour, Texture},
-    utils::random_double,
     vec3::Vec3,
 };
+use rand::random;
+use std::sync::Arc;
 
 pub trait Material: Sync + Send {
     fn scatter(
@@ -122,7 +121,7 @@ impl Material for Dielectric {
 
         let cannot_refract = refraction_ratio * sin_theta > 1.0;
         let direction =
-            if cannot_refract || Self::reflectance(cos_theta, refraction_ratio) > random_double() {
+            if cannot_refract || Self::reflectance(cos_theta, refraction_ratio) > random() {
                 unit_direction.reflect(&hit_record.normal)
             } else {
                 unit_direction.refract(&hit_record.normal, refraction_ratio)

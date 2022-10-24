@@ -1,8 +1,9 @@
 use crate::{
     ray::Ray,
-    utils::{degrees_to_radians, random_double_within_range},
+    utils::degrees_to_radians,
     vec3::{Point3, Vec3},
 };
+use rand::{thread_rng, Rng};
 
 pub struct Camera {
     origin: Point3,
@@ -61,7 +62,7 @@ impl Camera {
         Ray::new(
             self.origin + offset,
             self.lower_left_corner + s * self.horizontal + t * self.vertical - self.origin - offset,
-            random_double_within_range(self.shutter_open_time, self.shutter_close_time),
+            thread_rng().gen_range(self.shutter_open_time..=self.shutter_close_time),
         )
     }
 }

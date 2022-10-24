@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::{
     aabb::Aabb,
     hittable::{HitRecord, Hittable},
@@ -7,6 +5,7 @@ use crate::{
     sphere::Sphere,
     vec3::{Point3, Vec3},
 };
+use std::sync::Arc;
 
 pub struct MovingSphere {
     center_start: Point3,

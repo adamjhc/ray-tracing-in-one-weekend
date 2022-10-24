@@ -1,11 +1,10 @@
-use std::{cmp::Ordering, sync::Arc};
-
 use crate::{
     aabb::Aabb,
     hittable::{HitRecord, Hittable},
     ray::Ray,
-    utils::random_int,
 };
+use rand::{thread_rng, Rng};
+use std::{cmp::Ordering, sync::Arc};
 
 pub struct BVHNode {
     left: Arc<dyn Hittable>,
@@ -23,7 +22,7 @@ impl BVHNode {
     ) -> BVHNode {
         let mut objects = src_objects.clone();
 
-        let axis = random_int(0, 2);
+        let axis = thread_rng().gen_range(0..=2);
         let comparator = match axis {
             0 => box_x_compare,
             1 => box_y_compare,

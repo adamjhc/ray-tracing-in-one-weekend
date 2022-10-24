@@ -1,12 +1,9 @@
+use crate::colour::Colour;
 use core::panic;
+use rand::{random, thread_rng, Rng};
 use std::{
     fmt::Display,
     ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Neg, Sub},
-};
-
-use crate::{
-    colour::Colour,
-    utils::{random_double, random_double_within_range},
 };
 
 pub type Point3 = Vec3;
@@ -24,14 +21,15 @@ impl Vec3 {
     }
 
     pub fn random() -> Self {
-        Self::new(random_double(), random_double(), random_double())
+        Self::new(random(), random(), random())
     }
 
-    pub fn random_within_range(min: f64, max: f64) -> Self {
+    pub fn random_within(min: f64, max: f64) -> Self {
+        let mut thread_rng = thread_rng();
         Self::new(
-            random_double_within_range(min, max),
-            random_double_within_range(min, max),
-            random_double_within_range(min, max),
+            thread_rng.gen_range(min..=max),
+            thread_rng.gen_range(min..=max),
+            thread_rng.gen_range(min..=max),
         )
     }
 
@@ -61,7 +59,7 @@ impl Vec3 {
 
     pub fn random_in_unit_sphere() -> Self {
         loop {
-            let p = Self::random_within_range(-1.0, 1.0);
+            let p = Self::random_within(-1.0, 1.0);
             if p.length_squared() >= 1.0 {
                 continue;
             }
@@ -75,10 +73,11 @@ impl Vec3 {
     }
 
     pub fn random_in_unit_disk() -> Self {
+        let mut thread_rng = thread_rng();
         loop {
             let p = Vec3::new(
-                random_double_within_range(-1.0, 1.0),
-                random_double_within_range(-1.0, 1.0),
+                thread_rng.gen_range(-1.0..=1.0),
+                thread_rng.gen_range(-1.0..=1.0),
                 0.0,
             );
             if p.length_squared() >= 1.0 {

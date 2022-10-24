@@ -1,5 +1,3 @@
-use std::{f64::consts::PI, sync::Arc};
-
 use crate::{
     aabb::Aabb,
     hittable::{HitRecord, Hittable},
@@ -7,6 +5,7 @@ use crate::{
     ray::Ray,
     vec3::{Point3, Vec3},
 };
+use std::{f64::consts::PI, sync::Arc};
 
 pub struct Sphere {
     center: Point3,
