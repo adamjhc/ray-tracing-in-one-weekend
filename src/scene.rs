@@ -2,6 +2,8 @@ use crate::{
     aarect::{XYRect, XZRect, YZRect},
     camera::Camera,
     colour::Colour,
+    cuboid::Cuboid,
+    hittable::{Hittable, RotateY, Translate},
     hittable_list::HittableList,
     image::Image,
     material::{Dielectric, DiffuseLight, Lambertian, Metal},
@@ -271,7 +273,32 @@ impl Scene {
             555.0,
             white.clone(),
         )));
-        objects.push(Arc::new(XYRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white)));
+        objects.push(Arc::new(XYRect::new(
+            0.0,
+            555.0,
+            0.0,
+            555.0,
+            555.0,
+            white.clone(),
+        )));
+
+        let mut cuboid_1: Arc<dyn Hittable> = Arc::new(Cuboid::new(
+            Point3::new(0.0, 0.0, 0.0),
+            Point3::new(165.0, 330.0, 165.0),
+            white.clone(),
+        ));
+        cuboid_1 = Arc::new(RotateY::new(cuboid_1, 15.0));
+        cuboid_1 = Arc::new(Translate::new(cuboid_1, Vec3::new(265.0, 0.0, 295.0)));
+        objects.push(cuboid_1);
+
+        let mut cuboid_2: Arc<dyn Hittable> = Arc::new(Cuboid::new(
+            Point3::new(0.0, 0.0, 0.0),
+            Point3::new(165.0, 165.0, 165.0),
+            white,
+        ));
+        cuboid_2 = Arc::new(RotateY::new(cuboid_2, -18.0));
+        cuboid_2 = Arc::new(Translate::new(cuboid_2, Vec3::new(130.0, 0.0, 65.0)));
+        objects.push(cuboid_2);
 
         objects
     }
