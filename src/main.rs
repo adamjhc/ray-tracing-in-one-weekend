@@ -10,6 +10,7 @@ mod aarect;
 mod bvh;
 mod camera;
 mod colour;
+mod constant_medium;
 mod cuboid;
 mod hittable;
 mod hittable_list;

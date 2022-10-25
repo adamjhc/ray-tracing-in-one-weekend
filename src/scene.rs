@@ -2,6 +2,7 @@ use crate::{
     aarect::{XYRect, XZRect, YZRect},
     camera::Camera,
     colour::Colour,
+    constant_medium::ConstantMedium,
     cuboid::Cuboid,
     hittable::{Hittable, RotateY, Translate},
     hittable_list::HittableList,
@@ -25,6 +26,7 @@ pub enum Scene {
     Earth,
     SimpleLight,
     CornellBox,
+    CornellSmoke,
 }
 
 impl Scene {
@@ -78,6 +80,15 @@ impl Scene {
                     .set_look_at(Point3::new(278.0, 278.0, 0.0))
                     .set_vertical_field_of_view_degrees(40.0),
                 World::new(black, Self::cornell_box()),
+            ),
+            Self::CornellSmoke => (
+                image.set_aspect_ratio(1.0).set_width(600),
+                camera
+                    .set_aspect_ratio(1.0)
+                    .set_look_from(Point3::new(278.0, 278.0, -800.0))
+                    .set_look_at(Point3::new(278.0, 278.0, 0.0))
+                    .set_vertical_field_of_view_degrees(40.0),
+                World::new(black, Self::cornell_smoke()),
             ),
         }
     }
@@ -298,6 +309,75 @@ impl Scene {
         ));
         cuboid_2 = Arc::new(RotateY::new(cuboid_2, -18.0));
         cuboid_2 = Arc::new(Translate::new(cuboid_2, Vec3::new(130.0, 0.0, 65.0)));
+        objects.push(cuboid_2);
+
+        objects
+    }
+
+    fn cornell_smoke() -> HittableList {
+        let mut objects = HittableList::new();
+
+        let red = Arc::new(Lambertian::from(Colour::new(0.65, 0.05, 0.05)));
+        let white = Arc::new(Lambertian::from(Colour::new(0.73, 0.73, 0.73)));
+        let green = Arc::new(Lambertian::from(Colour::new(0.12, 0.45, 0.15)));
+        let light = Arc::new(DiffuseLight::new(Colour::new(7.0, 7.0, 7.0)));
+
+        objects.push(Arc::new(YZRect::new(0.0, 555.0, 0.0, 555.0, 555.0, green)));
+        objects.push(Arc::new(YZRect::new(0.0, 555.0, 0.0, 555.0, 0.0, red)));
+        objects.push(Arc::new(XZRect::new(
+            113.0, 443.0, 127.0, 432.0, 554.0, light,
+        )));
+        objects.push(Arc::new(XZRect::new(
+            0.0,
+            555.0,
+            0.0,
+            555.0,
+            0.0,
+            white.clone(),
+        )));
+        objects.push(Arc::new(XZRect::new(
+            0.0,
+            555.0,
+            0.0,
+            555.0,
+            555.0,
+            white.clone(),
+        )));
+        objects.push(Arc::new(XYRect::new(
+            0.0,
+            555.0,
+            0.0,
+            555.0,
+            555.0,
+            white.clone(),
+        )));
+
+        let mut cuboid_1: Arc<dyn Hittable> = Arc::new(Cuboid::new(
+            Point3::new(0.0, 0.0, 0.0),
+            Point3::new(165.0, 330.0, 165.0),
+            white.clone(),
+        ));
+        cuboid_1 = Arc::new(RotateY::new(cuboid_1, 15.0));
+        cuboid_1 = Arc::new(Translate::new(cuboid_1, Vec3::new(265.0, 0.0, 295.0)));
+        cuboid_1 = Arc::new(ConstantMedium::new(
+            cuboid_1,
+            0.01,
+            Colour::new(0.0, 0.0, 0.0),
+        ));
+        objects.push(cuboid_1);
+
+        let mut cuboid_2: Arc<dyn Hittable> = Arc::new(Cuboid::new(
+            Point3::new(0.0, 0.0, 0.0),
+            Point3::new(165.0, 165.0, 165.0),
+            white,
+        ));
+        cuboid_2 = Arc::new(RotateY::new(cuboid_2, -18.0));
+        cuboid_2 = Arc::new(Translate::new(cuboid_2, Vec3::new(130.0, 0.0, 65.0)));
+        cuboid_2 = Arc::new(ConstantMedium::new(
+            cuboid_2,
+            0.01,
+            Colour::new(1.0, 1.0, 1.0),
+        ));
         objects.push(cuboid_2);
 
         objects
