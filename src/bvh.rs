@@ -1,6 +1,7 @@
 use crate::{
     aabb::Aabb,
     hittable::{HitRecord, Hittable},
+    hittable_list::HittableList,
     ray::Ray,
 };
 use rand::{thread_rng, Rng};
@@ -13,15 +14,18 @@ pub struct BVHNode {
 }
 
 impl BVHNode {
-    pub fn new(
-        src_objects: &Vec<Arc<dyn Hittable>>,
+    pub fn new(mut hittable_list: HittableList, time_0: f64, time_1: f64) -> Self {
+        let end = hittable_list.objects.len();
+        Self::new_node(&mut hittable_list.objects, 0, end, time_0, time_1)
+    }
+
+    fn new_node(
+        objects: &mut Vec<Arc<dyn Hittable>>,
         start: usize,
         end: usize,
         time_0: f64,
         time_1: f64,
-    ) -> BVHNode {
-        let mut objects = src_objects.clone();
-
+    ) -> Self {
         let axis = thread_rng().gen_range(0..=2);
         let comparator = match axis {
             0 => box_x_compare,
@@ -45,8 +49,8 @@ impl BVHNode {
 
             let mid = start + object_span / 2;
             (
-                Arc::new(BVHNode::new(src_objects, start, mid, time_0, time_1)),
-                Arc::new(BVHNode::new(src_objects, mid, end, time_0, time_1)),
+                Arc::new(BVHNode::new_node(objects, start, mid, time_0, time_1)),
+                Arc::new(BVHNode::new_node(objects, mid, end, time_0, time_1)),
             )
         };
 
@@ -72,7 +76,9 @@ impl Hittable for BVHNode {
         }
 
         if let Some(hit_record) = self.left.hit(ray, t_min, t_max) {
-            Some(hit_record)
+            self.right
+                .hit(ray, t_min, hit_record.t)
+                .or(Some(hit_record))
         } else {
             self.right.hit(ray, t_min, t_max)
         }
@@ -85,7 +91,9 @@ impl Hittable for BVHNode {
 
 fn box_compare(a: &Arc<dyn Hittable>, b: &Arc<dyn Hittable>, axis: usize) -> Ordering {
     if let (Some(box_a), Some(box_b)) = (a.bounding_box(0.0, 0.0), b.bounding_box(0.0, 0.0)) {
-        box_a.minimum[axis].total_cmp(&box_b.minimum[axis])
+        box_a.minimum[axis]
+            .partial_cmp(&box_b.minimum[axis])
+            .unwrap()
     } else {
         panic!("No bounding box in BVHNode contructor")
     }
