@@ -6,3 +6,9 @@ This is a Rust implementation of Peter Shirley's "Ray Tracing in One Weekend". C
 
 - [x] Parallelised rendering using rayon
 - [x] Progress bars
+
+## Potential features
+
+- [ ] Render to window
+- [ ] Moveable camera?
+- [ ] PNG output
