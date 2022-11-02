@@ -4,7 +4,7 @@ This is a Rust implementation of Peter Shirley's "Ray Tracing in One Weekend". C
 
 ## Extra features
 
-- [x] Parallelised rendering using rayon
+- [x] Parallelised rendering using `rayon`
 - [x] Progress bars
 
 ## Potential features
