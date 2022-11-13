@@ -14,6 +14,18 @@ impl Colour {
     }
 
     pub fn write_to_rgb(&self, samples_per_pixel: i32) -> String {
+        let (r, g, b) = self.to_rgb(samples_per_pixel);
+
+        format!("{r} {g} {b}")
+    }
+
+    pub fn to_u32(self, samples_per_pixel: i32) -> u32 {
+        let (r, g, b) = self.to_rgb(samples_per_pixel);
+
+        ((r as u32) << 16) | ((g as u32) << 8) | b as u32
+    }
+
+    fn to_rgb(self, samples_per_pixel: i32) -> (u32, u32, u32) {
         // Divide the colour by the number of samples and gamma-correct for gamma=2.0
         let scale = 1.0 / samples_per_pixel as f64;
 
@@ -22,11 +34,11 @@ impl Colour {
         let b = (scale * self.b).sqrt();
 
         // Write the translated [0, 255] value of each colour component
-        format!(
-            "{} {} {}",
-            (256.0 * r.clamp(0.0, 0.999)) as i32,
-            (256.0 * g.clamp(0.0, 0.999)) as i32,
-            (256.0 * b.clamp(0.0, 0.999)) as i32,
+
+        (
+            (256.0 * r.clamp(0.0, 0.999)) as u32,
+            (256.0 * g.clamp(0.0, 0.999)) as u32,
+            (256.0 * b.clamp(0.0, 0.999)) as u32,
         )
     }
 

@@ -8,6 +8,6 @@ edition = "2021"
 [dependencies]
 rand = "0.8.5"
 rayon = "1.5.3"
-indicatif = {version = "0.17.1", features = ["rayon"]}
 image = "0.24.4"
 clap = { version = "4.0.18", features = ["derive"] }
+minifb = "0.23"

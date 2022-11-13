@@ -19,7 +19,7 @@ use clap::ValueEnum;
 use rand::{random, thread_rng, Rng};
 use std::{path::Path, sync::Arc};
 
-#[derive(ValueEnum, Clone)]
+#[derive(ValueEnum, Clone, Debug)]
 pub enum Scene {
     Random,
     TwoSpheres,
@@ -32,7 +32,7 @@ pub enum Scene {
 }
 
 impl Scene {
-    pub fn get(self) -> (Image, Camera, World) {
+    pub fn get(&self) -> (Image, Camera, World) {
         // Defaults
         let camera = Camera::new(
             Point3::new(13.0, 2.0, 3.0),
